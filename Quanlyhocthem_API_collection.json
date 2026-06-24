@@ -1,0 +1,3209 @@
+{
+  "info": {
+    "_postman_id": "e8476a9b-196f-48f3-ae34-53514bf77047",
+    "name": "Quanlyhocthem API - FIXED",
+    "description": "Postman Collection đã kiểm tra theo code trong zip Quanlyhocthem(1).zip. Đã sửa thứ tự demo, admin password, script lưu ID từ DTO Id, body/URL/token theo role.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "00 - Auth - Xác thực đăng nhập",
+      "item": [
+        {
+          "name": "Admin Login - Admin đăng nhập",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/login",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userName\": \"admin\",\n  \"password\": \"2412\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "",
+                  "pm.test(\"Đăng nhập thành công\", function () {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "    pm.expect(json.data).to.exist;",
+                  "    pm.expect(json.data.accessToken).to.exist;",
+                  "    pm.expect(json.data.refreshToken).to.exist;",
+                  "    pm.expect(json.data.accessTokenExpiresAt).to.exist;",
+                  "    pm.expect(json.data.refreshTokenExpiresAt).to.exist;",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200 && json.data) {",
+                  "    pm.collectionVariables.set(\"adminToken\", json.data.accessToken);",
+                  "    pm.collectionVariables.set(\"adminRefreshToken\", json.data.refreshToken);",
+                  "    pm.collectionVariables.set(\"adminUserId\", json.data.userId);",
+                  "    pm.collectionVariables.set(\"adminId\", json.data.userId);",
+                  "    ",
+                  "    ",
+                  "    console.log(\"admin login success\");",
+                  "    console.log(\"Access token expires at:\", json.data.accessTokenExpiresAt);",
+                  "    console.log(\"Refresh token expires at:\", json.data.refreshTokenExpiresAt);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Admin Refresh Token - Admin làm mới token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/refresh-token",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{adminRefreshToken}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "",
+                  "pm.test(\"Refresh token thành công\", function () {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "    pm.expect(json.data).to.exist;",
+                  "    pm.expect(json.data.accessToken).to.exist;",
+                  "    pm.expect(json.data.refreshToken).to.exist;",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200 && json.data) {",
+                  "    pm.collectionVariables.set(\"adminToken\", json.data.accessToken);",
+                  "    pm.collectionVariables.set(\"adminRefreshToken\", json.data.refreshToken);",
+                  "    pm.collectionVariables.set(\"adminUserId\", json.data.userId);",
+                  "    console.log(\"admin refresh token success\");",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Admin Logout - Admin đăng xuất",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/logout",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{adminRefreshToken}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Đăng xuất thành công\", function () {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    pm.collectionVariables.unset(\"adminToken\");",
+                  "    pm.collectionVariables.unset(\"adminRefreshToken\");",
+                  "    console.log(\"admin logout success\");",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Teacher Login - Giảng viên đăng nhập",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/login",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userName\": \"teacher01\",\n  \"password\": \"123456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "",
+                  "pm.test(\"Đăng nhập thành công\", function () {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "    pm.expect(json.data).to.exist;",
+                  "    pm.expect(json.data.accessToken).to.exist;",
+                  "    pm.expect(json.data.refreshToken).to.exist;",
+                  "    pm.expect(json.data.accessTokenExpiresAt).to.exist;",
+                  "    pm.expect(json.data.refreshTokenExpiresAt).to.exist;",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200 && json.data) {",
+                  "    pm.collectionVariables.set(\"teacherToken\", json.data.accessToken);",
+                  "    pm.collectionVariables.set(\"teacherRefreshToken\", json.data.refreshToken);",
+                  "    pm.collectionVariables.set(\"teacherUserId\", json.data.userId);",
+                  "    ",
+                  "    pm.collectionVariables.set(\"teacherId\", json.data.userId);",
+                  "    ",
+                  "    console.log(\"teacher login success\");",
+                  "    console.log(\"Access token expires at:\", json.data.accessTokenExpiresAt);",
+                  "    console.log(\"Refresh token expires at:\", json.data.refreshTokenExpiresAt);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Teacher Refresh Token - Giảng viên làm mới token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/refresh-token",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{teacherRefreshToken}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "",
+                  "pm.test(\"Refresh token thành công\", function () {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "    pm.expect(json.data).to.exist;",
+                  "    pm.expect(json.data.accessToken).to.exist;",
+                  "    pm.expect(json.data.refreshToken).to.exist;",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200 && json.data) {",
+                  "    pm.collectionVariables.set(\"teacherToken\", json.data.accessToken);",
+                  "    pm.collectionVariables.set(\"teacherRefreshToken\", json.data.refreshToken);",
+                  "    pm.collectionVariables.set(\"teacherUserId\", json.data.userId);",
+                  "    console.log(\"teacher refresh token success\");",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Teacher Logout - Giảng viên đăng xuất",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/logout",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{teacherRefreshToken}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Đăng xuất thành công\", function () {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    pm.collectionVariables.unset(\"teacherToken\");",
+                  "    pm.collectionVariables.unset(\"teacherRefreshToken\");",
+                  "    console.log(\"teacher logout success\");",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Student Login - Học viên đăng nhập",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/login",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userName\": \"student01\",\n  \"password\": \"123456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "",
+                  "pm.test(\"Đăng nhập thành công\", function () {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "    pm.expect(json.data).to.exist;",
+                  "    pm.expect(json.data.accessToken).to.exist;",
+                  "    pm.expect(json.data.refreshToken).to.exist;",
+                  "    pm.expect(json.data.accessTokenExpiresAt).to.exist;",
+                  "    pm.expect(json.data.refreshTokenExpiresAt).to.exist;",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200 && json.data) {",
+                  "    pm.collectionVariables.set(\"studentToken\", json.data.accessToken);",
+                  "    pm.collectionVariables.set(\"studentRefreshToken\", json.data.refreshToken);",
+                  "    pm.collectionVariables.set(\"studentUserId\", json.data.userId);",
+                  "    ",
+                  "    ",
+                  "    pm.collectionVariables.set(\"studentUserId\", json.data.userId);",
+                  "    console.log(\"student login success\");",
+                  "    console.log(\"Access token expires at:\", json.data.accessTokenExpiresAt);",
+                  "    console.log(\"Refresh token expires at:\", json.data.refreshTokenExpiresAt);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Student Refresh Token - Học viên làm mới token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/refresh-token",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{studentRefreshToken}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "",
+                  "pm.test(\"Refresh token thành công\", function () {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "    pm.expect(json.data).to.exist;",
+                  "    pm.expect(json.data.accessToken).to.exist;",
+                  "    pm.expect(json.data.refreshToken).to.exist;",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200 && json.data) {",
+                  "    pm.collectionVariables.set(\"studentToken\", json.data.accessToken);",
+                  "    pm.collectionVariables.set(\"studentRefreshToken\", json.data.refreshToken);",
+                  "    pm.collectionVariables.set(\"studentUserId\", json.data.userId);",
+                  "    console.log(\"student refresh token success\");",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Student Logout - Học viên đăng xuất",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/logout",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{studentRefreshToken}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Đăng xuất thành công\", function () {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    pm.collectionVariables.unset(\"studentToken\");",
+                  "    pm.collectionVariables.unset(\"studentRefreshToken\");",
+                  "    console.log(\"student logout success\");",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "01 - Admin - Setup Data - Admin tạo dữ liệu nền",
+      "item": [
+        {
+          "name": "Batches - Quản lý khóa học viên",
+          "item": [
+            {
+              "name": "Create Batch - Tạo khóa học viên",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": "{{baseUrl}}/api/Batches",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{adminToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Khóa 2026 Demo\",\n  \"description\": \"Khóa học viên dùng để test Postman\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const json = pm.response.json();",
+                      "pm.test(\"Status 2xx\", function () {",
+                      "    pm.expect(pm.response.code).to.be.within(200, 299);",
+                      "});",
+                      "if (pm.response.code >= 200 && pm.response.code < 300 && json.batchId) {",
+                      "    pm.collectionVariables.set(\"batchId\", json.batchId);",
+                      "    console.log(\"Saved batchId:\", json.batchId);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Get Batches - Lấy danh sách khóa học viên",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/Batches",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{adminToken}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const json = pm.response.json();",
+                      "if (pm.response.code === 200 && Array.isArray(json.data) && json.data.length > 0) {",
+                      "    pm.collectionVariables.set(\"batchId\", json.data[0].id);",
+                      "    console.log(\"Saved batchId:\", json.data[0].id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Get Batch By Id - Xem chi tiết khóa học viên",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/Batches/{{batchId}}",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{adminToken}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Update Batch - Cập nhật khóa học viên",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": "{{baseUrl}}/api/Batches/{{batchId}}",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{adminToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Khóa 2026 Demo Updated\",\n  \"description\": \"Đã cập nhật khóa học viên\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "name": "Delete Batch - Xóa khóa học viên",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": "{{baseUrl}}/api/Batches/{{batchId}}",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{adminToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": "Không nên chạy nếu batch đang được Student/Course dùng."
+              }
+            }
+          ]
+        },
+        {
+          "name": "Subjects - Quản lý môn học",
+          "item": [
+            {
+              "name": "Create Subject - Tạo môn học",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": "{{baseUrl}}/api/Subjects",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{adminToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Toán học\",\n  \"code\": \"MATH-DEMO\",\n  \"description\": \"Môn Toán dùng để demo\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const json = pm.response.json();",
+                      "pm.test(\"Status 2xx\", function () {",
+                      "    pm.expect(pm.response.code).to.be.within(200, 299);",
+                      "});",
+                      "if (pm.response.code >= 200 && pm.response.code < 300 && json.subjectId) {",
+                      "    pm.collectionVariables.set(\"subjectId\", json.subjectId);",
+                      "    console.log(\"Saved subjectId:\", json.subjectId);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Get Subjects - Lấy danh sách môn học",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/Subjects",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{adminToken}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const json = pm.response.json();",
+                      "if (pm.response.code === 200 && Array.isArray(json.data) && json.data.length > 0) {",
+                      "    pm.collectionVariables.set(\"subjectId\", json.data[0].id);",
+                      "    console.log(\"Saved subjectId:\", json.data[0].id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Get Subject By Id - Xem chi tiết môn học",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/Subjects/{{subjectId}}",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{adminToken}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Update Subject - Cập nhật môn học",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": "{{baseUrl}}/api/Subjects/{{subjectId}}",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{adminToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Toán học cập nhật\",\n  \"code\": \"MATH-DEMO-UP\",\n  \"description\": \"Môn Toán đã cập nhật\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "name": "Delete Subject - Xóa môn học",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": "{{baseUrl}}/api/Subjects/{{subjectId}}",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{adminToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": "Không nên chạy nếu subject đang được Course dùng."
+              }
+            }
+          ]
+        },
+        {
+          "name": "Classrooms - Quản lý phòng học",
+          "item": [
+            {
+              "name": "Create Classroom - Tạo phòng học",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": "{{baseUrl}}/api/Classrooms",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{adminToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Phòng 101\",\n  \"code\": \"P101\",\n  \"capacity\": 30\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const json = pm.response.json();",
+                      "pm.test(\"Status 2xx\", function () {",
+                      "    pm.expect(pm.response.code).to.be.within(200, 299);",
+                      "});",
+                      "if (pm.response.code >= 200 && pm.response.code < 300 && json.classroomId) {",
+                      "    pm.collectionVariables.set(\"classroomId\", json.classroomId);",
+                      "    console.log(\"Saved classroomId:\", json.classroomId);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Get Classrooms - Lấy danh sách phòng học",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/Classrooms",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{adminToken}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const json = pm.response.json();",
+                      "if (pm.response.code === 200 && Array.isArray(json.data) && json.data.length > 0) {",
+                      "    pm.collectionVariables.set(\"classroomId\", json.data[0].id);",
+                      "    console.log(\"Saved classroomId:\", json.data[0].id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Get Classroom By Id - Xem chi tiết phòng học",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/Classrooms/{{classroomId}}",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{adminToken}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Update Classroom - Cập nhật phòng học",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": "{{baseUrl}}/api/Classrooms/{{classroomId}}",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{adminToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Phòng 101 Updated\",\n  \"code\": \"P101\",\n  \"capacity\": 35\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "name": "Delete Classroom - Xóa phòng học",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": "{{baseUrl}}/api/Classrooms/{{classroomId}}",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{adminToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": "Không nên chạy nếu classroom đang được Course/Schedule dùng."
+              }
+            }
+          ]
+        },
+        {
+          "name": "Users - Quản lý tài khoản",
+          "item": [
+            {
+              "name": "Create Teacher - Tạo tài khoản giảng viên",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": "{{baseUrl}}/api/Users",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{adminToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"userName\": \"teacher01\",\n  \"password\": \"123456\",\n  \"fullName\": \"Nguyễn Văn Teacher\",\n  \"email\": \"teacher01@quanlyhocthem.local\",\n  \"phoneNumber\": \"0900000001\",\n  \"role\": 1,\n  \"studentCode\": null,\n  \"dateOfBirth\": null,\n  \"batchId\": null\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const json = pm.response.json();",
+                      "if (pm.response.code === 200 && json.userId) {",
+                      "    pm.collectionVariables.set(\"teacherId\", json.userId);",
+                      "    pm.collectionVariables.set(\"teacherUserId\", json.userId);",
+                      "    console.log(\"Saved teacherId:\", json.userId);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Create Student - Tạo tài khoản học viên",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": "{{baseUrl}}/api/Users",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{adminToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"userName\": \"student01\",\n  \"password\": \"123456\",\n  \"fullName\": \"Nguyễn Văn Student\",\n  \"email\": \"student01@quanlyhocthem.local\",\n  \"phoneNumber\": \"0900000002\",\n  \"role\": 2,\n  \"studentCode\": \"HV0001\",\n  \"dateOfBirth\": \"2008-01-01\",\n  \"batchId\": \"{{batchId}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const json = pm.response.json();",
+                      "if (pm.response.code === 200 && json.userId) {",
+                      "    pm.collectionVariables.set(\"studentUserId\", json.userId);",
+                      "    console.log(\"Saved studentUserId:\", json.userId);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Get Teachers - Lấy danh sách giảng viên",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/Users/teachers",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{adminToken}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const json = pm.response.json();",
+                      "if (pm.response.code === 200 && Array.isArray(json.data) && json.data.length > 0) {",
+                      "    const teacher = json.data.find(x => x.userName === \"teacher01\") || json.data[0];",
+                      "    pm.collectionVariables.set(\"teacherId\", teacher.id);",
+                      "    pm.collectionVariables.set(\"teacherUserId\", teacher.id);",
+                      "    console.log(\"Saved teacherId:\", teacher.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Get Students - Lấy danh sách học viên",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/Users/students",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{adminToken}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const json = pm.response.json();",
+                      "if (pm.response.code === 200 && Array.isArray(json.data) && json.data.length > 0) {",
+                      "    const student = json.data.find(x => x.studentCode === \"HV0001\") || json.data[0];",
+                      "    pm.collectionVariables.set(\"studentId\", student.studentId);",
+                      "    pm.collectionVariables.set(\"studentUserId\", student.userId);",
+                      "    console.log(\"Saved studentId:\", student.studentId);",
+                      "    console.log(\"Saved studentUserId:\", student.userId);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Get User By Id - Xem chi tiết tài khoản",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/Users/{{teacherId}}",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{adminToken}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Update User - Cập nhật tài khoản",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": "{{baseUrl}}/api/Users/{{teacherId}}",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{adminToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"fullName\": \"Nguyễn Văn Teacher Updated\",\n  \"email\": \"teacher01.updated@quanlyhocthem.local\",\n  \"phoneNumber\": \"0900000009\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "name": "Delete User - Xóa tài khoản",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": "{{baseUrl}}/api/Users/{{teacherId}}",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{adminToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": "Chỉ chạy khi muốn xóa tài khoản demo. Không nên chạy trong luồng demo chính nếu các module sau còn dùng teacherId."
+              }
+            }
+          ]
+        },
+        {
+          "name": "Courses - Quản lý lớp học",
+          "item": [
+            {
+              "name": "Create Course - Tạo lớp học",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": "{{baseUrl}}/api/Courses",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{adminToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Toán 9 Demo\",\n  \"description\": \"Lớp Toán 9 dùng để demo\",\n  \"tuitionFee\": 1500000,\n  \"maxStudents\": 30,\n  \"subjectId\": \"{{subjectId}}\",\n  \"batchId\": \"{{batchId}}\",\n  \"classroomId\": \"{{classroomId}}\",\n  \"teacherId\": \"{{teacherId}}\",\n  \"startDate\": \"2026-06-24\",\n  \"endDate\": \"2026-12-31\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const json = pm.response.json();",
+                      "pm.test(\"Status 2xx\", function () {",
+                      "    pm.expect(pm.response.code).to.be.within(200, 299);",
+                      "});",
+                      "if (pm.response.code >= 200 && pm.response.code < 300 && json.courseId) {",
+                      "    pm.collectionVariables.set(\"courseId\", json.courseId);",
+                      "    console.log(\"Saved courseId:\", json.courseId);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Get Courses - Lấy danh sách lớp học",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/Courses",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{adminToken}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const json = pm.response.json();",
+                      "if (pm.response.code === 200 && Array.isArray(json.data) && json.data.length > 0) {",
+                      "    pm.collectionVariables.set(\"courseId\", json.data[0].id);",
+                      "    console.log(\"Saved courseId:\", json.data[0].id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Get Course By Id - Xem chi tiết lớp học",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/Courses/{{courseId}}",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{adminToken}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Update Course - Cập nhật lớp học",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": "{{baseUrl}}/api/Courses/{{courseId}}",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{adminToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Toán 9 Demo Updated\",\n  \"description\": \"Lớp Toán 9 đã cập nhật\",\n  \"tuitionFee\": 1600000,\n  \"maxStudents\": 35,\n  \"subjectId\": \"{{subjectId}}\",\n  \"batchId\": \"{{batchId}}\",\n  \"classroomId\": \"{{classroomId}}\",\n  \"teacherId\": \"{{teacherId}}\",\n  \"startDate\": \"2026-06-24\",\n  \"endDate\": \"2026-12-31\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "name": "Delete Course - Xóa lớp học",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": "{{baseUrl}}/api/Courses/{{courseId}}",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{adminToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": "Không nên chạy nếu course đang được dùng trong đăng ký, bài tập, lịch học."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "02 - Student - Course Registration - Học viên đăng ký lớp",
+      "item": [
+        {
+          "name": "Get Available Courses - Xem lớp có thể đăng ký",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/course-registrations/available",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Register Course - Đăng ký lớp học",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/course-registrations/register",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"courseId\": \"{{courseId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test(\"Status 2xx\", function () {",
+                  "    pm.expect(pm.response.code).to.be.within(200, 299);",
+                  "});",
+                  "if (pm.response.code >= 200 && pm.response.code < 300 && json.enrollmentId) {",
+                  "    pm.collectionVariables.set(\"enrollmentId\", json.enrollmentId);",
+                  "    console.log(\"Saved enrollmentId:\", json.enrollmentId);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get My Courses - Xem lớp học của tôi",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/course-registrations/my-courses",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Course Registration - Hủy đăng ký lớp học",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/course-registrations/{{courseId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 - Course Schedules - Lịch học và lịch dạy",
+      "item": [
+        {
+          "name": "Admin Create Course Schedule - Admin tạo lịch học cho lớp",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/course-schedules",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"courseId\": \"{{courseId}}\",\n  \"teacherId\": \"{{teacherId}}\",\n  \"classroomId\": \"{{classroomId}}\",\n  \"dayOfWeek\": 1,\n  \"startTime\": \"18:00:00\",\n  \"endTime\": \"20:00:00\",\n  \"effectiveFrom\": \"2026-06-24\",\n  \"effectiveTo\": \"2026-12-31\",\n  \"note\": \"Lịch học demo tối thứ 2\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test(\"Status 2xx\", function () {",
+                  "    pm.expect(pm.response.code).to.be.within(200, 299);",
+                  "});",
+                  "if (pm.response.code >= 200 && pm.response.code < 300 && json.courseScheduleId) {",
+                  "    pm.collectionVariables.set(\"courseScheduleId\", json.courseScheduleId);",
+                  "    console.log(\"Saved courseScheduleId:\", json.courseScheduleId);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Admin Get Course Schedules - Admin xem danh sách lịch học",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/course-schedules",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Admin Get Course Schedule By Id - Admin xem chi tiết lịch học",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/course-schedules/{{courseScheduleId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Admin Update Course Schedule - Admin cập nhật lịch học",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/course-schedules/{{courseScheduleId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"teacherId\": \"{{teacherId}}\",\n  \"classroomId\": \"{{classroomId}}\",\n  \"dayOfWeek\": 3,\n  \"startTime\": \"18:30:00\",\n  \"endTime\": \"20:30:00\",\n  \"effectiveFrom\": \"2026-06-24\",\n  \"effectiveTo\": \"2026-12-31\",\n  \"note\": \"Cập nhật lịch học sang tối thứ 4\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Admin Delete Course Schedule - Admin xóa lịch học",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/course-schedules/{{courseScheduleId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Student Get My Weekly Schedule - Học viên xem thời khóa biểu tuần",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/student/schedules/weekly?weekDate=2026-06-24",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Teacher Get My Teaching Schedule - Giảng viên xem lịch dạy tuần",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/teacher/schedules/weekly?weekDate=2026-06-24&courseId={{courseId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 - Teacher - Courses - Giảng viên xem lớp phụ trách",
+      "item": [
+        {
+          "name": "Get My Teaching Courses - Xem lớp đang giảng dạy",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/teacher/courses",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Course Students - Xem học viên trong lớp",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/teacher/courses/{{courseId}}/students",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 - Tuition Invoices - Quản lý học phí",
+      "item": [
+        {
+          "name": "Admin Get Tuition Invoices - Admin xem danh sách học phí",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/tuition-invoices",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Admin Get Tuition Invoice By Id - Admin xem chi tiết học phí",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/tuition-invoices/{{tuitionInvoiceId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Admin Create Tuition Invoice - Admin tạo hóa đơn học phí",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/tuition-invoices",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"studentId\": \"{{studentId}}\",\n  \"courseId\": \"{{courseId}}\",\n  \"amount\": 1500000,\n  \"dueDate\": \"2026-07-15\",\n  \"note\": \"Học phí demo tháng 7\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test(\"Status 2xx\", function () {",
+                  "    pm.expect(pm.response.code).to.be.within(200, 299);",
+                  "});",
+                  "if (pm.response.code >= 200 && pm.response.code < 300 && json.tuitionInvoiceId) {",
+                  "    pm.collectionVariables.set(\"tuitionInvoiceId\", json.tuitionInvoiceId);",
+                  "    console.log(\"Saved tuitionInvoiceId:\", json.tuitionInvoiceId);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Admin Update Tuition Invoice - Admin cập nhật hóa đơn học phí",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/tuition-invoices/{{tuitionInvoiceId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 1600000,\n  \"dueDate\": \"2026-07-20\",\n  \"note\": \"Cập nhật học phí demo\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Admin Mark Tuition Invoice As Paid - Admin xác nhận đã đóng học phí",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/tuition-invoices/{{tuitionInvoiceId}}/paid",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"paidAt\": \"2026-07-10T08:00:00Z\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Admin Delete Tuition Invoice - Admin xóa hóa đơn học phí",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/tuition-invoices/{{tuitionInvoiceId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Không xóa được hóa đơn đã thanh toán."
+          }
+        },
+        {
+          "name": "Student Get My Tuition Invoices - Học viên xem học phí của mình",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/student/tuition-invoices",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "06 - Assignments - Submissions - Grades - Bài tập, bài nộp, chấm điểm",
+      "item": [
+        {
+          "name": "Teacher Create Assignment - Giảng viên tạo bài tập",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/teacher/assignments",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"courseId\": \"{{courseId}}\",\n  \"title\": \"Bài tập Demo 01\",\n  \"description\": \"Làm bài tập chương 1\",\n  \"dueDate\": \"2026-07-30T23:59:00Z\",\n  \"maxScore\": 10,\n  \"attachmentFileName\": \"baitap-demo.pdf\",\n  \"attachmentUrl\": \"https://example.com/baitap-demo.pdf\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test(\"Status 2xx\", function () {",
+                  "    pm.expect(pm.response.code).to.be.within(200, 299);",
+                  "});",
+                  "if (pm.response.code >= 200 && pm.response.code < 300 && json.assignmentId) {",
+                  "    pm.collectionVariables.set(\"assignmentId\", json.assignmentId);",
+                  "    console.log(\"Saved assignmentId:\", json.assignmentId);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Teacher Get Course Assignments - Giảng viên xem bài tập theo lớp",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/teacher/assignments/course/{{courseId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Teacher Get Assignment By Id - Giảng viên xem chi tiết bài tập",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/teacher/assignments/{{assignmentId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Teacher Update Assignment - Giảng viên cập nhật bài tập",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/teacher/assignments/{{assignmentId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Bài tập Demo 01 Updated\",\n  \"description\": \"Cập nhật nội dung bài tập\",\n  \"dueDate\": \"2026-08-05T23:59:00Z\",\n  \"maxScore\": 10,\n  \"attachmentFileName\": \"baitap-demo-updated.pdf\",\n  \"attachmentUrl\": \"https://example.com/baitap-demo-updated.pdf\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Teacher Delete Assignment - Giảng viên xóa bài tập",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/teacher/assignments/{{assignmentId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Student Get My Assignments - Học viên xem bài tập của mình",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/student/assignments",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Student Get Assignment By Id - Học viên xem chi tiết bài tập",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/student/assignments/{{assignmentId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Student Submit Assignment - Học viên nộp bài",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/student/assignments/submit",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"assignmentId\": \"{{assignmentId}}\",\n  \"content\": \"Em nộp bài tập demo.\",\n  \"submittedFileName\": \"bai-nop-demo.pdf\",\n  \"submittedFileUrl\": \"https://example.com/bai-nop-demo.pdf\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test(\"Status 2xx\", function () {",
+                  "    pm.expect(pm.response.code).to.be.within(200, 299);",
+                  "});",
+                  "if (pm.response.code >= 200 && pm.response.code < 300 && json.submissionId) {",
+                  "    pm.collectionVariables.set(\"submissionId\", json.submissionId);",
+                  "    console.log(\"Saved submissionId:\", json.submissionId);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Teacher Get Assignment Submissions - Giảng viên xem bài nộp",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/teacher/assignments/{{assignmentId}}/submissions",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Teacher Grade Submission - Giảng viên chấm điểm bài nộp",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/teacher/assignments/submissions/{{submissionId}}/grade",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"score\": 9,\n  \"feedback\": \"Bài làm tốt, trình bày rõ ràng.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test(\"Status 2xx\", function () {",
+                  "    pm.expect(pm.response.code).to.be.within(200, 299);",
+                  "});",
+                  "if (pm.response.code >= 200 && pm.response.code < 300 && json.gradeId) {",
+                  "    pm.collectionVariables.set(\"gradeId\", json.gradeId);",
+                  "    console.log(\"Saved gradeId:\", json.gradeId);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Student Get My Grades - Học viên xem điểm của mình",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/student/assignments/grades",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "07 - Attendances - Điểm danh",
+      "item": [
+        {
+          "name": "Teacher Open Attendance Session - Giảng viên mở ca điểm danh",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/teacher/attendances/sessions",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"courseId\": \"{{courseId}}\",\n  \"durationMinutes\": 30,\n  \"note\": \"Ca điểm danh demo\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "",
+                  "pm.test(\"Mở ca điểm danh thành công\", function () {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "    pm.expect(json.data).to.exist;",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200 && json.data) {",
+                  "    pm.collectionVariables.set(\"attendanceSessionId\", json.data.attendanceSessionId);",
+                  "    pm.collectionVariables.set(\"attendanceCode\", json.data.attendanceCode);",
+                  "    console.log(\"Saved attendanceSessionId:\", json.data.attendanceSessionId);",
+                  "    console.log(\"Saved attendanceCode:\", json.data.attendanceCode);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Student Check In - Học viên điểm danh",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/student/attendances/check-in",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"attendanceCode\": \"{{attendanceCode}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Teacher Get Attendance Records - Giảng viên xem danh sách điểm danh",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/teacher/attendances/sessions/{{attendanceSessionId}}/records",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (pm.response.code === 200 && json.data && Array.isArray(json.data.records) && json.data.records.length > 0) {",
+                  "    pm.collectionVariables.set(\"attendanceId\", json.data.records[0].attendanceId);",
+                  "    console.log(\"Saved attendanceId:\", json.data.records[0].attendanceId);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Teacher Update Attendance Record - Giảng viên cập nhật trạng thái điểm danh",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/teacher/attendances/{{attendanceId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": 1,\n  \"note\": \"Cập nhật thủ công từ Postman\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "08 - Leave Requests - Đơn xin nghỉ",
+      "item": [
+        {
+          "name": "Student Create Leave Request - Học viên gửi đơn xin nghỉ",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/student/leave-requests",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"courseId\": \"{{courseId}}\",\n  \"leaveDate\": \"2026-07-01\",\n  \"reason\": \"Em xin nghỉ vì lý do cá nhân.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test(\"Status 2xx\", function () {",
+                  "    pm.expect(pm.response.code).to.be.within(200, 299);",
+                  "});",
+                  "if (pm.response.code >= 200 && pm.response.code < 300 && json.leaveRequestId) {",
+                  "    pm.collectionVariables.set(\"leaveRequestId\", json.leaveRequestId);",
+                  "    console.log(\"Saved leaveRequestId:\", json.leaveRequestId);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Student Get My Leave Requests - Học viên xem đơn xin nghỉ của mình",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/student/leave-requests",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Student Get Leave Request By Id - Học viên xem chi tiết đơn xin nghỉ",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/student/leave-requests/{{leaveRequestId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Student Update Leave Request - Học viên sửa đơn xin nghỉ",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/student/leave-requests/{{leaveRequestId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"leaveDate\": \"2026-07-02\",\n  \"reason\": \"Em cập nhật lý do xin nghỉ.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Student Delete Leave Request - Học viên xóa đơn xin nghỉ",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/student/leave-requests/{{leaveRequestId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Chỉ xóa được khi đơn còn chờ giảng viên duyệt."
+          }
+        },
+        {
+          "name": "Teacher Get Leave Requests - Giảng viên xem đơn xin nghỉ",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/teacher/leave-requests",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Teacher Get Leave Request By Id - Giảng viên xem chi tiết đơn xin nghỉ",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/teacher/leave-requests/{{leaveRequestId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Teacher Approve Leave Request - Giảng viên duyệt đơn xin nghỉ",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/teacher/leave-requests/{{leaveRequestId}}/approve",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"teacherNote\": \"Giảng viên đồng ý.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Teacher Reject Leave Request - Giảng viên từ chối đơn xin nghỉ",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/teacher/leave-requests/{{leaveRequestId}}/reject",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"teacherNote\": \"Giảng viên từ chối.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Admin Get Leave Requests - Admin xem đơn đã được giảng viên duyệt",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/admin/leave-requests",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Admin Get Leave Request By Id - Admin xem chi tiết đơn xin nghỉ",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/admin/leave-requests/{{leaveRequestId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Admin Approve Leave Request - Admin xác nhận đơn xin nghỉ",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/admin/leave-requests/{{leaveRequestId}}/approve",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"adminNote\": \"Admin xác nhận.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Admin Reject Leave Request - Admin từ chối đơn xin nghỉ",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/admin/leave-requests/{{leaveRequestId}}/reject",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"adminNote\": \"Admin từ chối.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "09 - Payrolls - Bảng lương giảng viên",
+      "item": [
+        {
+          "name": "Admin Create Payroll - Admin tạo bảng lương",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/payrolls",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"teacherId\": \"{{teacherId}}\",\n  \"month\": 7,\n  \"year\": 2026,\n  \"teachingSessions\": 12,\n  \"baseSalary\": 3000000,\n  \"teachingSessionAmount\": 200000,\n  \"bonusAmount\": 500000,\n  \"deductionAmount\": 0,\n  \"note\": \"Bảng lương demo tháng 7\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test(\"Status 2xx\", function () {",
+                  "    pm.expect(pm.response.code).to.be.within(200, 299);",
+                  "});",
+                  "if (pm.response.code >= 200 && pm.response.code < 300 && json.payrollId) {",
+                  "    pm.collectionVariables.set(\"payrollId\", json.payrollId);",
+                  "    console.log(\"Saved payrollId:\", json.payrollId);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Admin Get Payrolls - Admin xem danh sách bảng lương",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/payrolls",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Admin Get Payroll By Id - Admin xem chi tiết bảng lương",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/payrolls/{{payrollId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Admin Update Payroll - Admin cập nhật bảng lương",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/payrolls/{{payrollId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"teachingSessions\": 13,\n  \"baseSalary\": 3000000,\n  \"teachingSessionAmount\": 200000,\n  \"bonusAmount\": 600000,\n  \"deductionAmount\": 0,\n  \"note\": \"Cập nhật bảng lương demo\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Admin Confirm Payroll - Admin xác nhận bảng lương",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": "{{baseUrl}}/api/payrolls/{{payrollId}}/confirm",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Admin Mark Payroll As Paid - Admin xác nhận đã thanh toán lương",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/payrolls/{{payrollId}}/paid",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"paidAt\": \"2026-07-31T08:00:00Z\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Admin Delete Payroll - Admin xóa bảng lương",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/payrolls/{{payrollId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Không xóa được bảng lương đã thanh toán."
+          }
+        },
+        {
+          "name": "Teacher Get My Payrolls - Giảng viên xem bảng lương của mình",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/teacher/payrolls",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Teacher Get My Payroll By Id - Giảng viên xem chi tiết bảng lương",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/teacher/payrolls/{{payrollId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "10 - Notifications - Thông báo",
+      "item": [
+        {
+          "name": "Get My Notifications - Xem thông báo của tôi",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/notifications",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Có thể đổi Authorization sang teacherToken/studentToken nếu muốn xem thông báo của role khác."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (pm.response.code === 200 && Array.isArray(json.data) && json.data.length > 0) {",
+                  "    pm.collectionVariables.set(\"notificationId\", json.data[0].notificationId || json.data[0].id);",
+                  "    console.log(\"Saved notificationId:\", pm.collectionVariables.get(\"notificationId\"));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Mark Notification As Read - Đánh dấu thông báo đã đọc",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": "{{baseUrl}}/api/notifications/{{notificationId}}/read",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Student Get My Notifications - Học viên xem thông báo",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/student/notifications",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (pm.response.code === 200 && Array.isArray(json.data) && json.data.length > 0) {",
+                  "    pm.collectionVariables.set(\"notificationId\", json.data[0].notificationId || json.data[0].id);",
+                  "    console.log(\"Saved notificationId:\", pm.collectionVariables.get(\"notificationId\"));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Student Mark Notification As Read - Học viên đánh dấu thông báo đã đọc",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": "{{baseUrl}}/api/student/notifications/{{notificationId}}/read",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://localhost:7298",
+      "type": "string"
+    },
+    {
+      "key": "adminToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "adminRefreshToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "teacherToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "teacherRefreshToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "studentToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "studentRefreshToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "adminId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "adminUserId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "teacherId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "teacherUserId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "studentId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "studentUserId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "batchId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "subjectId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "classroomId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "courseId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "courseScheduleId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "enrollmentId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "tuitionInvoiceId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "assignmentId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "submissionId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "gradeId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "attendanceSessionId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "attendanceId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "attendanceCode",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "leaveRequestId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "payrollId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "notificationId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Collection-level pre-request script",
+          "// Có thể dùng để debug biến nếu cần."
+        ]
+      }
+    }
+  ]
+}
