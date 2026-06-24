@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="Quanlyhocthem.Application/Quanlyhocthem.Application.csproj" />
+  <Project Path="Quanlyhocthem.Domain/Quanlyhocthem.Domain.csproj" />
+  <Project Path="Quanlyhocthem.Infrastructure/Quanlyhocthem.Infrastructure.csproj" />
+  <Project Path="Quanlyhocthem/Quanlyhocthem.Api.csproj" />
+</Solution>

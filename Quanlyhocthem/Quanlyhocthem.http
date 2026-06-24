@@ -1,0 +1,6 @@
+@Quanlyhocthem_HostAddress = http://localhost:5283
+
+GET {{Quanlyhocthem_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
